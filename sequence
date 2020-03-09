@@ -1,0 +1,10 @@
+create dataset
+create initial map function for dataset to parse them
+see how dataset looks like
+make sure image corresponds to the same mask
+convert mask gifs to appropriate format for using
+again see how dataset looks like
+and also make sure again that image corresponds to same mask
+set experimental options
+convert dataset into tfrecords
+i dont know next, maybe unet

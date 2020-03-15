@@ -1,38 +1,9 @@
-"""
-File name: tf_losses_and_metrics.py
-Author: Benjamin Planche
-Date created: 14.02.2019
-Date last modified: 14:49 14.02.2019
-Python Version: 3.6
-Copyright = "Copyright (C) 2018-2019 of Packt"
-Credits = ["Eliot Andres, Benjamin Planche"]
-License = "MIT"
-Version = "1.0.0"
-Maintainer = "non"
-Status = "Prototype" # "Prototype", "Development", or "Production"
-"""
-
-#==============================================================================
-# Imported Modules
-#==============================================================================
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
 from tf_math import log_n, binary_outline
-
-#==============================================================================
-# Constant Definitions
-#==============================================================================
-
-#==============================================================================
-# Function Definitions
-#==============================================================================
-
-# -----------------------------------------------------------------------------
-#  HELPER FUNCTIONS
-# -----------------------------------------------------------------------------
 
 
 def initialize_variables():
@@ -54,15 +25,6 @@ def initialize_variables():
 def adapt_tf_streaming_metric_for_keras(tf_metric, name,
                                         preprocss_fn=None, postprocess_fn=None,
                                         **kwargs):
-    """
-    Wrap a TensorFlow metric into a partial function which can be passed to Keras models.
-    :param tf_metric:      TensorFlow metric which should be wrapped (e.g. `tf.metrics.mean_iou`)
-    :param name:           Should be the name of the TF metric function.
-                           (e.g. for `tf.metrics.mean_iou`, `name` should be "mean_iou")
-    :param preprocss_fn:   (opt.) Function to pre-process `y_true`, `y_pred`
-    :param postprocess_fn: (opt.) Function to post-process the metric value
-    :return:               Metric function compatible wth Keras
-    """
 
     # Inspired from snipped by Ruzhitskiy Bogdan
     # (https://github.com/keras-team/keras/issues/6050#issuecomment-329996505)
@@ -100,13 +62,7 @@ def adapt_tf_streaming_metric_for_keras(tf_metric, name,
 
 
 def get_mask_for_valid_labels(y_true, num_classes, ignore_value=255):
-    """
-    Build a mask for the valid pixels, i.e. those not belonging to the ignored classes.
-    :param y_true:        Ground-truth label map(s) (each value represents a class trainID)
-    :param num_classes:   Total nomber of classes
-    :param ignore_value:  trainID value of ignored classes (`None` if ignored none)
-    :return:              Binary mask of same shape as `y_true`
-    """
+
     mask_for_class_elements = y_true < num_classes
     mask_for_not_ignored = y_true != ignore_value
     mask = mask_for_class_elements & mask_for_not_ignored
@@ -114,14 +70,6 @@ def get_mask_for_valid_labels(y_true, num_classes, ignore_value=255):
 
 
 def prepare_data_for_segmentation_loss(y_true, y_pred, num_classes=10, ignore_value=255):
-    """
-    Prepare predicted logits and ground-truth maps for the loss, removing pixels from ignored classes.
-    :param y_true:        Ground-truth label map(s) (e.g., of shape B x H x W)
-    :param y_pred:        Predicted logit map(s) () (e.g., of shape B x H x W x N, N number of classes)
-    :param num_classes:   Number of classes
-    :param ignore_value:  trainID value of ignored classes (`None` if ignored none) 
-    :return:              Tensors edited, ready for the loss computation
-    """
 
     with tf.name_scope('prepare_data_for_loss'):
         # Flattening the tensors to simplify the following operations:
@@ -146,12 +94,6 @@ def prepare_data_for_segmentation_loss(y_true, y_pred, num_classes=10, ignore_va
 
 
 def prepare_class_weight_map(y_true, weights):
-    """
-    Prepare pixel weight map based on class weighing.
-    :param y_true:        Ground-truth label map(s) (e.g., of shape B x H x W)
-    :param weights:       1D tensor of shape (N,) containing the weight value for each of the N classes
-    :return:              Weight map (e.g., of shape B x H x W)
-    """
     y_true_one_hot = tf.one_hot(y_true, tf.shape(weights)[0])
     weight_map = tf.tensordot(y_true_one_hot, weights, axes=1)
     return weight_map
@@ -159,15 +101,7 @@ def prepare_class_weight_map(y_true, weights):
 
 def prepare_outline_weight_map(y_true, num_classes, outline_size=5,
                                outline_val=4., default_val=1.):
-    """
-    Prepare pixel weight map based on class outlines.
-    :param y_true:        Ground-truth label map(s) (e.g., of shape B x H x W)
-    :param num_classes:   Number of classes
-    :param outline_size:  Outline size/thickness
-    :param outline_val:   Weight value for outline pixels
-    :param default_val:   Weight value for other pixels
-    :return:              Weight map (e.g., of shape B x H x W)
-    """
+
     y_true_one_hot = tf.squeeze(tf.one_hot(y_true, num_classes), axis=-2)
     outline_map_perclass = binary_outline(y_true_one_hot, outline_size)
     outline_map = tf.reduce_max(outline_map_perclass, axis=-1)
@@ -175,30 +109,14 @@ def prepare_outline_weight_map(y_true, num_classes, outline_size=5,
     return outline_map
 
 
-# -----------------------------------------------------------------------------
-#  METRIC FUNCTIONS
-# -----------------------------------------------------------------------------
-
 def psnr(img_a, img_b, max_img_value=255):
-    """
-    Compute the PSNR (Peak Signal-to-Noise Ratio) between two images.
-    :param img_a:           Image A
-    :param img_b:           Image B
-    :param max_img_value:   Maximum possible pixel value of the images
-    :return:                PSNR value
-    """
+
     mse = tf.reduce_mean((img_a - img_b) ** 2)
     return 20 * log_n(max_img_value, 10) - 10 * log_n(mse, 10)
 
 
 def segmentation_accuracy(y_true, y_pred, ignore_value=255):
-    """
-    Compute the accuracy, ignoring pixels from some misc. classes.
-    :param y_true:        Ground-truth label map(s) (e.g., of shape B x H x W)
-    :param y_pred:        Predicted logit map(s) () (e.g., of shape B x H x W x N, N number of classes)
-    :param ignore_value:  trainID value of ignored classes (`None` if ignored none) 
-    :return:              Tensors edited, ready for the loss computation
-    """
+
     with tf.name_scope('segmentation_accuracy'):
         num_classes = y_pred.shape[-1]
         y_pred = tf.cast(tf.argmax(y_pred, axis=-1), tf.int32)
@@ -214,12 +132,6 @@ segmentation_accuracy.__name__ = "acc"
 
 
 def mean_iou_metric(num_classes, ignore_value=255):
-    """
-    Return a IoU metric function for Keras models.
-    :param num_classes:   Number of target classes
-    :return:              Metric function compatible wth Keras
-    :param ignore_value:  trainID value of ignored classes (`None` if ignored none) 
-    """
 
     def preprocess_for_mean_iou(y_true, y_pred):
         # Like for other metrics/losses, we remove the values for the ignored class(es):
@@ -239,10 +151,6 @@ def mean_iou_metric(num_classes, ignore_value=255):
     return metric
 
 
-
-# -----------------------------------------------------------------------------
-#  LOSS/METRIC CLASSES
-# -----------------------------------------------------------------------------
 
 class SegmentationAccuracy(tf.metrics.Accuracy):
     def __init__(self, ignore_value=255, name='acc', dtype=None):

@@ -1,20 +1,3 @@
-"""
-File name: plot_utils.py
-Author: Benjamin Planche
-Date created: 14.02.2019
-Date last modified: 14:42 14.02.2019
-Python Version: 3.6
-Copyright = "Copyright (C) 2018-2019 of Packt"
-Credits = ["Eliot Andres, Benjamin Planche"]
-License = "MIT"
-Version = "1.0.0"
-Maintainer = "non"
-Status = "Prototype" # "Prototype", "Development", or "Production"
-"""
-
-#==============================================================================
-# Imported Modules
-#==============================================================================
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -24,21 +7,9 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-#==============================================================================
-# Function Definitions
-#==============================================================================
-
 def plot_image_grid(images, titles=None, figure=None,
                     grayscale=False, transpose=False):
-    """
-    Plot a grid of n x m images
-    :param images:       Images in a n x m array
-    :param titles:       (opt.) List of m titles for each image column
-    :param figure:       (opt.) Pyplot figure (if None, will be created)
-    :param grayscale:    (opt.) Flag to draw the images in grayscale
-    :param transpose:    (opt.) Flag to transpose the grid
-    :return:             Pyplot figure filled with the images
-    """
+
     num_cols, num_rows = len(images), len(images[0])
     img_ratio = images[0][0].shape[1] / images[0][0].shape[0]
 
@@ -77,11 +48,7 @@ def plot_image_grid(images, titles=None, figure=None,
 
 
 def figure_to_rgb_array(fig):
-    """
-    Convert figure into a RGB array
-    :param fig:         PyPlot Figure
-    :return:            RGB array
-    """
+
     figure_buffer = io.BytesIO()
     fig.savefig(figure_buffer, format='png')
     figure_buffer.seek(0)
@@ -90,12 +57,7 @@ def figure_to_rgb_array(fig):
 
 
 def figure_to_summary(fig, name, step):
-    """
-    Convert figure into TF summary
-    :param fig:             Figure
-    :param tag:             Summary name
-    :return:                Summary step
-    """
+
     # Transform figure into PNG buffer:
     figure_string = figure_to_rgb_array(fig)
 

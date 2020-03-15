@@ -1,20 +1,3 @@
-"""
-File name: keras_custom_callbacks.py
-Author: Benjamin Planche
-Date created: 14.02.2019
-Date last modified: 14:49 14.02.2019
-Python Version: 3.6
-Copyright = "Copyright (C) 2018-2019 of Packt"
-Credits = ["Eliot Andres, Benjamin Planche"]
-License = "MIT"
-Version = "1.0.0"
-Maintainer = "non"
-Status = "Prototype" # "Prototype", "Development", or "Production"
-"""
-
-#==============================================================================
-# Imported Modules
-#==============================================================================
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -25,9 +8,6 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from plot_utils import plot_image_grid, figure_to_summary
 
-#==============================================================================
-# Class Definitions
-#==============================================================================
 
 class DynamicPlotCallback(tf.keras.callbacks.Callback):
     """ Keras callback which plots the training losses/metrics and updates the figure after each epoch:.
@@ -92,14 +72,6 @@ class SimpleLogCallback(tf.keras.callbacks.Callback):
 
     def __init__(self, metrics_dict, num_epochs='?', log_frequency=1,
                  metric_string_template='\033[1m[[name]]\033[0m = \033[94m{[[value]]:5.3f}\033[0m'):
-        """
-        Initialize the Callback.
-        :param metrics_dict:            Dictionary containing mappings for metrics names/keys
-                                        e.g. {"accuracy": "acc", "val. accuracy": "val_acc"}
-        :param num_epochs:              Number of training epochs
-        :param log_frequency:           Log frequency (in epochs)
-        :param metric_string_template:  (opt.) String template to print each metric
-        """
         super().__init__()
 
         self.metrics_dict = collections.OrderedDict(metrics_dict)
@@ -131,7 +103,6 @@ class SimpleLogCallback(tf.keras.callbacks.Callback):
             values = [logs[self.metrics_dict[metric_name]] for metric_name in self.metrics_dict]
             print(self.log_string_template.format(epoch, self.num_epochs, *values))
 
-#==============================================================================
 
 class TensorBoardImageGridCallback(tf.keras.callbacks.Callback):
     """ Keras callback for generative models, to draw grids of
@@ -141,19 +112,6 @@ class TensorBoardImageGridCallback(tf.keras.callbacks.Callback):
     def __init__(self, log_dir, input_images, target_images=None, tag='images',
                  figsize=(10, 10), dpi=300, grayscale=False, transpose=False,
                  preprocess_fn=None):
-        """
-        Initialize the Callback.
-        :param log_dir:         Folder to write the image summaries into
-        :param input_images:    List of input images to use for the grid
-        :param target_images:   (opt.) List of target images for the grid
-        :param tag:             Tag to name the Tensorboard summary
-        :param figsize:         Pyplot figure size for the grid
-        :param dpi:             Pyplot figure DPI
-        :param grayscale:       Flag to plot the images as grayscale
-        :param transpose:       Flag to transpose the image grid
-        :param preprocess_fn:   (opt.) Function to pre-process the
-                                input/predicted/target image lists before plotting
-        """
         super().__init__()
 
         self.summary_writer = tf.summary.create_file_writer(log_dir)
@@ -172,11 +130,6 @@ class TensorBoardImageGridCallback(tf.keras.callbacks.Callback):
         self.transpose = transpose
 
     def on_epoch_end(self, epoch, logs={}):
-        """
-        Plot into Tensorboard a grid of image results.
-        :param epoch:   Epoch num
-        :param logs:    (unused) Dictionary of loss/metrics value for the epoch
-        """
 
         # Get predictions with current model:
         predicted_images = self.model.predict_on_batch(self.input_images)
